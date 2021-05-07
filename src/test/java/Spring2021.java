@@ -2,7 +2,10 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Properties;
 
+import com.codingame.gameengine.runner.CommandLinePlayerAgent;
 import com.codingame.gameengine.runner.MultiplayerGameRunner;
+import com.codingame.gameengine.runner.simulate.AgentData;
+import com.codingame.gameengine.runner.simulate.GameResult;
 
 public class Spring2021 {
 
@@ -15,9 +18,13 @@ public class Spring2021 {
     static String[] BOSS_WOOD1 = new String[] {
         "python3", "config/level2/Boss.py"
     };
-
+    static String[] MY_AI = new String[] {
+        "java", "config/IaTraining.java"
+    };
     public static void main(String[] args) throws IOException, InterruptedException {
+
         launchGame();
+
     }
 
     public static void launchGame() throws IOException, InterruptedException {
@@ -32,15 +39,29 @@ public class Spring2021 {
             "Tororo",
             "https://static.codingame.com/servlet/fileservlet?id=61910307869345"
         );
-        
+        gameRunner.addAgent(
+            MY_AI,
+            "My Ai",
+            "https://static.codingame.com/servlet/fileservlet?id=61910307869345"
+        );
+        /*
         gameRunner.addAgent(
             DEFAULT_AI,
             "Ghilbib",
             "https://static.codingame.com/servlet/fileservlet?id=61910289640958"
         );
-        
-        gameRunner.setSeed(7308340236785320085L);
+        */
 
-        gameRunner.start(8888);
+        long leftLimit = 1L;
+        long rightLimit = 10L;
+        long generatedLong = leftLimit + (long) (Math.random() * (rightLimit - leftLimit));
+        gameRunner.setSeed(generatedLong);
+
+        //gameRunner.start(8888);
+        GameResult result=gameRunner.simulate();
+        for(int i=0;i<result.agents.size();i++){
+            System.out.println(result.agents.get(i).name+" -> "+result.scores.get(i));
+        }
+        
     }
 }
