@@ -1,0 +1,10 @@
+[x] faire la moyenne des durées de calcul à chaque tour
+[ ] finir le calcul de nb_actions_next_day
+[ ] avoir une fonction d'évaluation correcte
+[ ] prendre en compte les ombres
+[ ] mettre un perceptron en place -> IA V.1
+[ ] mettre un RN en place -> IA V.2
+[ ] faire un alpha-beta avec le meilleur des deux -> IA V.3
+[ ] faire un reseau de neurone qui sélectionne lui-même le coup -> IA V.4
+
+(à la fin, il faudra choisir entre la V3 et la V4)
