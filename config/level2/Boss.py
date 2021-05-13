@@ -23,8 +23,10 @@ while True:
     sun, score = [int(i) for i in input().split()]
     other_sun, other_score, other_is_waiting = [int(i) for i in input().split()]
     number_of_trees = int(input())
+    print(str(_round)+'\n'+str(nutrients)+'\n'+str(sun)+'\n'+str(score)+'\n'+str(other_sun)+'\n'+str(other_score)+'\n'+str(other_is_waiting)+'\n', file=sys.stderr, flush=True)
     for i in range(number_of_trees):
         cell_index, size, tree_owner, is_dormant = [int(j) for j in input().split()]
+        print(str(cell_index)+'\n'+str(size)+'\n'+str(tree_owner)+'\n'+str(is_dormant), file=sys.stderr, flush=True)
     possible_move_number = int(input())
 
     moves = []
@@ -33,7 +35,7 @@ while True:
         moves.append(raw)
 
     moves.sort(key=evaluate, reverse=True)
-    
+
     if 'COMPLETE' in moves[0] and score == 0:
         print(moves[0])
     else:
