@@ -399,7 +399,7 @@ class Game{
     }
 
     Action getNextAction() {
-        if(day<16){
+        if(day<13){
             for(int i=0;i<possibleActions.size();i++){
                 possibleActions.get(i).growSetScore(this);
             }
