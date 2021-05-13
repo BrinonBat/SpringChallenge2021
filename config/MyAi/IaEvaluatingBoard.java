@@ -1,7 +1,7 @@
 import java.util.*;
 import java.io.*;
 import java.math.*;
-public class IaTraining{
+public class IaEvaluatingBoard{
 
     public static void main(String args[]) {
         Scanner in = new Scanner(System.in);
@@ -107,48 +107,24 @@ class Tree{
         this.isMine = tree.isMine;
         this.isDormant = tree.isDormant;
     }
-    
-    /*
-    public int dist(Game game,Tree target){
-        int from_me=0;
-        int from_target=0;
-        Cell my_cell=game.board.get(cellIndex);
-        Cell target_cell=game.board.get(target.cellIndex);
-        int[] my_neighbours=my_cell.neighbours;
-        int[] target_neighbours=target_cell.neighbours;
-        for(;from_me<=4;from_me++){
-            int[]
-        }
-    }
-    */
 }
 
 class Cell {
     int index;
     int richess;
     int[] neighbours;
-   // Tree tree;
 
     public Cell(int index, int richess, int[] neighbours) {
         this.index = index;
         this.richess = richess;
         this.neighbours = neighbours;
         
-     //   this.tree=null;
     }
     public Cell(Cell cell){
         this.index = cell.index;
         this.richess = cell.richess;
         this.neighbours = cell.neighbours;
     }
-    /*
-    public Cell getNeighbour(List<Cell> board,int dir,int dist){
-        Cell result=board.get(neighbours[dir]);
-        for(;dist>1;dist--){
-            result=board.get(result.neighbours)
-        }
-    }
-    */
 }
 
 class Action {
@@ -209,17 +185,15 @@ class Action {
     }
 
     //retourne l'évaluation du coup
-    void setScore(Game game){
-        int cost=0;
-        Game next_turn_state=new Game(game);
-        for (Tree t : game.li_ally_trees) {
-            System.err.println(t.cellIndex+" a un arbre de taille "+t.size);
-        }
+    void growSetScore(Game game){
         switch(this.type){
-            case(WAIT): System.err.println("============= "+this.type+" =============");break;
+            case(WAIT): System.err.println("============= "+this.type+" =============");return;
             case(SEED):{
 
                 System.err.println("============= "+this.type+" "+this.sourceCellIdx+" "+targetCellIdx+" =============");
+
+                int cost=0;
+                Game next_turn_state=new Game(game);
 
                 //ajout de l'arbre au jeu
                 boolean isDormant=true;
@@ -232,13 +206,16 @@ class Action {
                     if(game.li_ally_trees.get(i).size==0) cost++;
                 }
                 next_turn_state.mySun-=cost;
-                
-                break;
+
+                //evaluation de l'état resultant
+                score=next_turn_state.evaluate();
             }
             case(COMPLETE):{
-
-
+                
                 System.err.println("============= "+this.type+" "+this.targetCellIdx+" =============");
+
+                int cost=0;
+                Game next_turn_state=new Game(game);
 
                 //calcul du coût et du gain
                 cost=4;
@@ -250,20 +227,27 @@ class Action {
                 next_turn_state.myScore+=value;
                 next_turn_state.nutrients--;
                 next_turn_state.trees.remove(TargetHasTree(game));
+
+                //evaluation de l'état resultant
+                score=next_turn_state.evaluate();
+
                 break;
             } 
             case(GROW):{
 
                 System.err.println("============= "+this.type+" "+this.targetCellIdx+" =============");
                 
+                int cost=0;
+                Game next_turn_state=new Game(game);
+
                 //modification de l'arbre
                 Tree modified_tree=TargetHasTree(next_turn_state);
                 modified_tree.isDormant=true;
-                modified_tree.size++;
+                int size=modified_tree.size+1;
 
     
                 //calcul du coût ((taille!-taille)+nb_arbres_nouvelle_taille)
-                switch(modified_tree.size){
+                switch(size){
                     case(0): cost=0; break;
                     case(1): cost=1; break;
                     case(2): cost=3; break;
@@ -271,10 +255,88 @@ class Action {
                     default: System.err.println("TAILLE NON RECONNUE"); break;
                 }
                 for(int i=0; i<game.li_ally_trees.size();i++){
-                    if(game.li_ally_trees.get(i).size==modified_tree.size) cost++;
+                    if(game.li_ally_trees.get(i).size==size) cost++;
                 }
                 next_turn_state.mySun-=cost;
+                modified_tree.size++;
 
+                //evaluation de l'état resultant
+                score=next_turn_state.evaluate();
+
+                break;
+
+            }
+            default:{
+                System.err.println("erreur lors du calcul du coût de l'action "+this);
+                score=-1;
+            } 
+        }
+    }
+
+     //retourne l'évaluation du coup
+    void harvestSetScore(Game game){
+        
+        switch(this.type){
+            case(WAIT): System.err.println("============= "+this.type+" =============");score=0; break;
+            case(SEED): System.err.println("============= "+this.type+" "+this.sourceCellIdx+" "+targetCellIdx+" =============");score=0; break; //plus de seed à partir de ce tour
+            case(COMPLETE):{
+
+                System.err.println("============= "+this.type+" "+this.targetCellIdx+" =============");
+                if(game.day<game.nbMaxDay-1) score=0;
+                else{
+                    float value=(game.board.get(targetCellIdx).richess-1)*2;
+                    value=value+game.nutrients;
+                    score=value*100;   
+                }
+
+                break;
+            } 
+            case(GROW):{
+        
+                System.err.println("============= "+this.type+" "+this.targetCellIdx+" =============");
+                
+                //récupération de la taille de l'arbre
+                int size=TargetHasTree(game).size+1;
+
+                int nb_turn_lasting=game.nbMaxDay-game.day; // nb jous celui-ci inclus
+                if((3-size)>nb_turn_lasting){
+                    score=0; 
+                    System.err.println(" SIZE "+size+" POUR "+nb_turn_lasting+" TOURS "); // inutile de le monter car peut pas arriver level 3 avant la fin
+                } else {
+
+                    //calcul du coût ((taille!-taille)+nb_arbres_nouvelle_taille)
+                    int cost=0;
+                    int gain=0;
+                    int[] qty_tree_size=new int[4];
+
+                    //calcule du coût et de l'energie gagnée chaque jour
+                    for(int i=0; i<game.li_ally_trees.size();i++){
+                        qty_tree_size[game.li_ally_trees.get(i).size]++;
+                        gain+=game.li_ally_trees.get(i).size;
+                    }
+                    gain++; //l'arbre aura monté de niveau, donc plus de points d'energie ensuite
+
+                    qty_tree_size[size]++;
+                    qty_tree_size[size-1]--;
+
+                    //calcul du coup pour monter l'arbre niveau 3
+                    switch(size){
+                        case(1): cost+=1+qty_tree_size[1];
+                        case(2): cost+=3+qty_tree_size[2];
+                        case(3): cost+=7+qty_tree_size[3]; break;
+                        default: System.err.println("TAILLE NON RECONNUE"); break;
+                    }
+
+                    //on ramène ce gain sur la durée restante
+                    gain=gain*nb_turn_lasting;
+                    gain=(gain/3)*2; //normalisation pour palier à la non prise en compte des ombres
+
+                    int energy=game.mySun+gain; //energie pouvant probablement être dépensée d'ici la fin de la partie
+
+                    int dispo_next=energy-cost; //energy restante pour prochaine actions
+                    if(dispo_next>=(qty_tree_size[3]*4)) score=10*size+game.board.get(targetCellIdx).richess;
+                    else score=-1;
+                }
                 break;
 
             }
@@ -283,13 +345,7 @@ class Action {
                 score=-1;
             }
               
-        }
-        
-        //evaluation de l'état resultant
-        score=next_turn_state.evaluate();
-       // if(this.type==GROW){
-
-        //}
+        };
     }
 
 }
@@ -343,15 +399,14 @@ class Game{
     }
 
     Action getNextAction() {
-        if(day<20){
+        if(day<16){
             for(int i=0;i<possibleActions.size();i++){
-                possibleActions.get(i).setScore(this);
+                possibleActions.get(i).growSetScore(this);
             }
         }
         else{
-            //TODO methode predict
             for(int i=0;i<possibleActions.size();i++){
-                possibleActions.get(i).setScore(this); // sera remplacée par une methode de prediction
+                possibleActions.get(i).harvestSetScore(this); // sera remplacée par une methode de prediction
             }
         }
 
@@ -367,10 +422,10 @@ class Game{
 
     public float evaluate(){
         //définition de coefficients.
-        int COEF_TREES=day-1; //valeur du positionnement et niveau des arbres
-        int COEF_SCORE=day; //score officiel obtenu
+        int COEF_TREES=day+1; //valeur du positionnement et niveau des arbres
+        int COEF_SCORE=day*2; //score officiel obtenu
         //int COEF_NB_ACTIONS=nbMaxDay; //nombre probable de coups joués au prochain jour. ERASED
-        int COEF_GENERATED_SUN=nbMaxDay-day;
+        int COEF_GENERATED_SUN=(nbMaxDay-day)*2;
 
 
         //CHAQUE SCORE DOIT AVOIR LE MEME MIN ET LE MEME MAX
