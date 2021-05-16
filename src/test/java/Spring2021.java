@@ -21,7 +21,7 @@ public class Spring2021 {
         "python3", "config/level2/Boss.py"
     };
     static String[] MY_AI = new String[] {
-        "java", "config/MyAi/IaEvaluatingBoard.java"
+        "java", "config/MyAi/IaEvaluatingAction.java"
     };
     public static void main(String[] args) throws IOException, InterruptedException {
 

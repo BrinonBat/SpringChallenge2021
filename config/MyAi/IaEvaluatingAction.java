@@ -186,6 +186,150 @@ class Action {
     }
 
     //retourne l'évaluation du coup
+    void expandSetScore(Game game){
+        
+        boolean center_is_complete=true;
+        for(Cell cell : game.board){
+            if(cell.TargetHasTree(game) == null && cell.richess==3) center_is_complete=false;
+        }
+        if(center_is_complete){
+            growSetScore(game);
+            return;
+        }
+        switch(this.type){
+            case(WAIT): System.err.println("============= "+this.type+" =============");score=10; break;
+            case(SEED):{
+                System.err.println("============= "+this.type+" "+this.sourceCellIdx+" "+targetCellIdx+" =============");
+                
+                switch(game.board.get(targetCellIdx).richess){
+                    case (0): score=0;break;
+                    case (1): score=0;break;
+                    case (2): score=0;break;
+                    case (3): score=300;break;
+                    default: System.out.println("default richess at "+game.board.get(targetCellIdx).richess);
+                };
+                
+                break;   
+            } 
+            case(COMPLETE):System.err.println("============= "+this.type+" "+this.targetCellIdx+" =============");score=0;break;
+            
+            case(GROW):{
+        
+                System.err.println("============= "+this.type+" "+this.targetCellIdx+" =============");
+                
+                int prio=game.board.get(targetCellIdx).richess;
+                
+                if(prio==1) score=500;
+                else if(prio==3) score=200;
+                else score=0;
+                break;
+
+            }
+            default:{
+                System.err.println("erreur lors du calcul du coût de l'action "+this);
+                score=-1;
+            }
+              
+        };
+    }
+
+    //retourne l'évaluation du coup
+    void growSetScore(Game game){
+        
+        switch(this.type){
+            case(WAIT): System.err.println("============= "+this.type+" =============");score=10; break;
+            case(SEED):{
+                System.err.println("============= "+this.type+" "+this.sourceCellIdx+" "+targetCellIdx+" =============");
+                
+                switch(game.board.get(targetCellIdx).richess){
+                    case (0): score=0;break;
+                    case (1): score=0;break;
+                    case (2): score=0;break;
+                    case (3): score=300;break;
+                    default: System.out.println("default richess at "+game.board.get(targetCellIdx).richess);
+                };
+                
+                break;
+            }
+            case(COMPLETE):{
+                System.err.println("============= "+this.type+" "+this.targetCellIdx+" =============");
+                
+                int prio=game.board.get(targetCellIdx).richess;
+                
+                if(prio==1) score=0;
+                else if(prio==3) score=300;
+                else score=0;
+                break;
+
+            } 
+            case(GROW):{
+                System.err.println("============= "+this.type+" "+this.targetCellIdx+" =============");
+                
+                int prio=game.board.get(targetCellIdx).richess;
+                
+                if(prio==1) score=200;
+                else if(prio==3) score=200;
+                else score=0;
+                break;
+
+            }
+            default:{
+                System.err.println("erreur lors du calcul du coût de l'action "+this);
+                score=-1;
+            }
+              
+        };
+    }
+
+    //retourne l'évaluation du coup
+    void maximizeSetScore(Game game){
+        
+        switch(this.type){
+            case(WAIT): System.err.println("============= "+this.type+" =============");score=10; break;
+            case(SEED):{
+                System.err.println("============= "+this.type+" "+this.sourceCellIdx+" "+targetCellIdx+" =============");
+                
+                switch(game.board.get(targetCellIdx).richess){
+                    case (0): score=0;break;
+                    case (1): score=0;break;
+                    case (2): score=0;break;
+                    case (3): score=300;break;
+                    default: System.out.println("default richess at "+game.board.get(targetCellIdx).richess);
+                };
+                
+                break;
+            }
+            case(COMPLETE):{
+                System.err.println("============= "+this.type+" "+this.targetCellIdx+" =============");
+                
+                int prio=game.board.get(targetCellIdx).richess;
+                
+                if(prio==1) score=0;
+                else if(prio==3) score=300;
+                else score=0;
+                break;
+
+            } 
+            case(GROW):{
+                System.err.println("============= "+this.type+" "+this.targetCellIdx+" =============");
+                
+                int prio=game.board.get(targetCellIdx).richess;
+                
+                if(prio==1) score=200;
+                else if(prio==3) score=200;
+                else score=0;
+                break;
+
+            }
+            default:{
+                System.err.println("erreur lors du calcul du coût de l'action "+this);
+                score=-1;
+            }
+              
+        };
+    }
+    
+    //retourne l'évaluation du coup
     void harvestSetScore(Game game){
         
         switch(this.type){
